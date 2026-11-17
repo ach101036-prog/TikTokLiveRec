@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">LiveVault</string>
+    <string name="nav_studio">Studio</string>
+    <string name="nav_vault">Vault</string>
+    <string name="studio_title">Live Studio</string>
+    <string name="studio_subtitle">Enter a TikTok username to verify live status and capture to MP4</string>
+    <string name="username_label">TikTok Username</string>
+    <string name="username_placeholder">e.g. @creatorname</string>
+    <string name="check_live_status">Check Live Status</string>
+    <string name="checking_status">Checking live status…</string>
+    <string name="start_recording">Start Recording</string>
+    <string name="stop_and_save">Stop &amp; Save MP4</string>
+    <string name="status_live">LIVE NOW</string>
+    <string name="status_offline">OFFLINE</string>
+    <string name="status_recording">REC</string>
+    <string name="vault_title">Offline Vault</string>
+    <string name="vault_subtitle">Saved MP4 recordings ready for offline playback</string>
+    <string name="vault_empty_title">No Saved Recordings Yet</string>
+    <string name="vault_empty_body">Check a creator\'s live status in Studio and tap Start Recording to save an MP4 stream locally.</string>
+    <string name="search_vault_placeholder">Search by @username or title</string>
+    <string name="player_title">Offline Player</string>
+    <string name="share_video">Share MP4</string>
+    <string name="delete_video">Delete</string>
+    <string name="watch_offline">Watch Offline</string>
+    <string name="recent_creators">Recent Creators</string>
+    <string name="stream_quality">Stream Quality</string>
+    <string name="notification_channel_recording">Active Stream Recording</string>
+    <string name="notification_channel_saved">Recording Saved Alerts</string>
+    <string name="notification_saved_title">MP4 Recording Saved</string>
+    <string name="mute_preview">Mute preview</string>
+    <string name="unmute_preview">Unmute preview</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm_delete_title">Delete Recording?</string>
+    <string name="confirm_delete_body">This will permanently remove the local MP4 file from your device.</string>
+</resources>

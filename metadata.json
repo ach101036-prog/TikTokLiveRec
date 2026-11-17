@@ -1,0 +1,6 @@
+{
+  "name": "LiveVault",
+  "description": "Check TikTok creator live status, watch live stream previews with a recording timer, and save streams locally as MP4 files for offline viewing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
