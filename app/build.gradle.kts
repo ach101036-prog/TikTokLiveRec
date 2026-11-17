@@ -14,7 +14,7 @@ android {
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
   defaultConfig {
-    applicationId = "com.aistudio.livevault.rmxkpq"
+    applicationId = "com.aistudio.flowbrowser.vxrmpq"
     minSdk = 24
     targetSdk = 36
     versionCode = 1
@@ -121,9 +121,10 @@ dependencies {
   // implementation(libs.firebase.appcheck.recaptcha)
   // implementation(libs.firebase.appcheck.debug)
   implementation(libs.androidx.media3.exoplayer)
-  implementation(libs.androidx.media3.exoplayer.hls)
+  // implementation(libs.androidx.media3.exoplayer.hls)
   implementation(libs.androidx.media3.ui)
-  implementation(libs.androidx.media3.datasource.okhttp)
+  // implementation(libs.androidx.media3.datasource.okhttp)
+  implementation(libs.ffmpeg.kit)
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.coroutines.core)
   implementation(libs.kotlinx.serialization.json)

@@ -9,53 +9,53 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-private val StudioDarkColorScheme = darkColorScheme(
-    primary = CrimsonLive,
-    onPrimary = Color.White,
-    primaryContainer = CrimsonLiveContainer,
-    onPrimaryContainer = Color(0xFFFFD9DF),
-    secondary = CyanSignal,
-    onSecondary = Color(0xFF00201C),
-    secondaryContainer = CyanSignalContainer,
-    onSecondaryContainer = Color(0xFF9DF7EB),
-    tertiary = AmberStatus,
+private val BrowserDarkColorScheme = darkColorScheme(
+    primary = CyanElectric,
+    onPrimary = Color(0xFF001F26),
+    primaryContainer = CyanElectricContainer,
+    onPrimaryContainer = Color(0xFF9DF2FF),
+    secondary = CoralPulse,
+    onSecondary = Color.White,
+    secondaryContainer = CoralPulseContainer,
+    onSecondaryContainer = Color(0xFFFFD9DF),
+    tertiary = AmberWarn,
     onTertiary = Color(0xFF281800),
-    tertiaryContainer = AmberStatusContainer,
+    tertiaryContainer = AmberWarnContainer,
     onTertiaryContainer = Color(0xFFFFE0A6),
-    background = StudioObsidian,
-    onBackground = TextOnDark,
-    surface = StudioSurface,
-    onSurface = TextOnDark,
-    surfaceVariant = StudioSurfaceElevated,
-    onSurfaceVariant = TextMutedOnDark,
-    outline = StudioCardBorder,
-    outlineVariant = Color(0xFF232838),
+    background = BrowserObsidian,
+    onBackground = TextPrimaryDark,
+    surface = BrowserSurface,
+    onSurface = TextPrimaryDark,
+    surfaceVariant = BrowserElevated,
+    onSurfaceVariant = TextSecondaryDark,
+    outline = BrowserOutline,
+    outlineVariant = Color(0xFF1F2739),
     error = Color(0xFFFF5A5F),
     onError = Color.White
 )
 
-private val StudioLightColorScheme = lightColorScheme(
-    primary = CrimsonLiveLight,
+private val BrowserLightColorScheme = lightColorScheme(
+    primary = CyanElectricLight,
     onPrimary = Color.White,
-    primaryContainer = Color(0xFFFFD9DF),
-    onPrimaryContainer = Color(0xFF400010),
-    secondary = CyanSignalLight,
+    primaryContainer = Color(0xFFCFF6FF),
+    onPrimaryContainer = Color(0xFF002029),
+    secondary = CoralPulseLight,
     onSecondary = Color.White,
-    secondaryContainer = Color(0xFFCFF7F1),
-    onSecondaryContainer = Color(0xFF00201C),
+    secondaryContainer = Color(0xFFFFD9DF),
+    onSecondaryContainer = Color(0xFF400010),
     tertiary = Color(0xFFB87400),
     onTertiary = Color.White,
-    background = LightBackground,
-    onBackground = TextOnLight,
+    background = LightBg,
+    onBackground = TextPrimaryLight,
     surface = LightSurface,
-    onSurface = TextOnLight,
-    surfaceVariant = LightSurfaceVariant,
-    onSurfaceVariant = TextMutedOnLight,
-    outline = Color(0xFFD6DCE8),
-    outlineVariant = Color(0xFFE7EBF3)
+    onSurface = TextPrimaryLight,
+    surfaceVariant = LightSurfaceAlt,
+    onSurfaceVariant = TextSecondaryLight,
+    outline = LightOutline,
+    outlineVariant = Color(0xFFE3E8F2)
 )
 
-val LiveVaultShapes = Shapes(
+val FlowBrowserShapes = Shapes(
     small = RoundedCornerShape(10.dp),
     medium = RoundedCornerShape(16.dp),
     large = RoundedCornerShape(22.dp),
@@ -63,15 +63,15 @@ val LiveVaultShapes = Shapes(
 )
 
 @Composable
-fun LiveVaultTheme(
+fun FlowBrowserTheme(
     darkTheme: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) StudioDarkColorScheme else StudioLightColorScheme
+    val colorScheme = if (darkTheme) BrowserDarkColorScheme else BrowserLightColorScheme
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = LiveVaultTypography,
-        shapes = LiveVaultShapes,
+        typography = FlowBrowserTypography,
+        shapes = FlowBrowserShapes,
         content = content
     )
 }

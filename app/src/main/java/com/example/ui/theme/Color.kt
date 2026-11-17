@@ -2,27 +2,29 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Studio Darkroom Palette
-val StudioObsidian = Color(0xFF0D0F14)
-val StudioSurface = Color(0xFF151821)
-val StudioSurfaceElevated = Color(0xFF1D2230)
-val StudioCardBorder = Color(0xFF2B3245)
+// Obsidian Cinema Browser Palette
+val BrowserObsidian = Color(0xFF0A0D14)
+val BrowserSurface = Color(0xFF111622)
+val BrowserElevated = Color(0xFF192030)
+val BrowserOutline = Color(0xFF283248)
 
-val CrimsonLive = Color(0xFFFF2D55)
-val CrimsonLiveContainer = Color(0xFF3E101D)
-val CyanSignal = Color(0xFF00E5CC)
-val CyanSignalContainer = Color(0xFF0A3330)
-val AmberStatus = Color(0xFFFFB020)
-val AmberStatusContainer = Color(0xFF382709)
+val CyanElectric = Color(0xFF00E5FF)
+val CyanElectricContainer = Color(0xFF07323F)
+val CoralPulse = Color(0xFFFF4D6D)
+val CoralPulseContainer = Color(0xFF3E111E)
+val AmberWarn = Color(0xFFFFB020)
+val AmberWarnContainer = Color(0xFF382709)
+val EmeraldReady = Color(0xFF10B981)
 
-val TextOnDark = Color(0xFFF5F7FA)
-val TextMutedOnDark = Color(0xFF9AA3B2)
+val TextPrimaryDark = Color(0xFFF3F6FC)
+val TextSecondaryDark = Color(0xFF94A3B8)
 
-// Studio Daylight Fallback Palette
-val LightBackground = Color(0xFFF7F8FC)
+// Daylight Palette
+val LightBg = Color(0xFFF5F7FB)
 val LightSurface = Color(0xFFFFFFFF)
-val LightSurfaceVariant = Color(0xFFEEF1F7)
-val CrimsonLiveLight = Color(0xFFD91A42)
-val CyanSignalLight = Color(0xFF00877A)
-val TextOnLight = Color(0xFF11141C)
-val TextMutedOnLight = Color(0xFF5A6275)
+val LightSurfaceAlt = Color(0xFFEBF0F7)
+val LightOutline = Color(0xFFD0D8E6)
+val CyanElectricLight = Color(0xFF00839E)
+val CoralPulseLight = Color(0xFFD9234B)
+val TextPrimaryLight = Color(0xFF0F172A)
+val TextSecondaryLight = Color(0xFF475569)

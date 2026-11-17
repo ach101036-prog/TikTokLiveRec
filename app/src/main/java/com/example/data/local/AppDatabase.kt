@@ -6,12 +6,13 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [RecordingEntity::class],
+    entities = [DownloadedVideoEntity::class, BookmarkEntity::class],
     version = 1,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun recordingDao(): RecordingDao
+    abstract fun downloadedVideoDao(): DownloadedVideoDao
+    abstract fun bookmarkDao(): BookmarkDao
 
     companion object {
         @Volatile
@@ -22,7 +23,7 @@ abstract class AppDatabase : RoomDatabase() {
                 instance ?: Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "livevault.db"
+                    "flowbrowser.db"
                 ).build().also { instance = it }
             }
         }

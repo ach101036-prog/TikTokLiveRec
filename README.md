@@ -1,45 +1,48 @@
-# LiveVault — TikTok Live Stream Recorder for Android
+# FlowBrowser — Video-Detecting Android Web Browser with FFmpeg MP4 Export
 
-LiveVault is a Kotlin & Jetpack Compose Android application that checks whether a TikTok creator is currently live, plays a real-time stream preview with a live recording timer, captures the live stream locally to `.mp4` for offline playback, and alerts you with a notification as soon as the file finishes saving.
+**FlowBrowser** is a Kotlin & Jetpack Compose Android web browser that automatically detects videos playing on web pages and lets you download them in `.mp4` format at your chosen resolution using FFmpeg in a background Foreground Service.
 
-## Features
+## Key Features
 
-- **Live Status Verification**: Enter any `@username` (or TikTok live URL) to verify whether the creator is currently streaming before starting a capture.
-- **Live Preview + Time Counter**: Watch the live HLS/FLV stream in Jetpack Media3 (`ExoPlayer`) alongside a live `00:00:00` timer, byte counter, segment tracker, and preview mute toggle.
-- **Local MP4 Capture**: Captures HLS (`.m3u8`) and HTTP-FLV (`.flv`) streams directly into standard `.mp4` files saved in `Movies/LiveVault` via `MediaStore` (no broad storage permissions required).
-- **Save Alert Notifications**: Runs capture inside an Android Foreground Service and fires a high-priority notification when the MP4 finishes saving—tap to open straight into the offline player.
-- **Offline Vault & Player**: Browse, search, share, delete, and watch all saved MP4 recordings offline.
+- **Full WebView Browser**: URL/search omnibox, multi-tab management, bookmarks (Room), Desktop Site toggle, and fullscreen HTML5 `<video>` playback.
+- **Dual-Layer Video Detection**:
+  - **DOM & Player Hooks**: Injected JavaScript monitors HTML5 `<video>` elements (`play`, `playing`, `loadedmetadata`), `HTMLMediaElement.prototype.play`, `fetch`, and `XMLHttpRequest` calls.
+  - **Network Stream Sniffer**: Intercepts `.mp4`, `.m4v`, `.webm`, `.mov`, `.mkv`, `.m3u8` (HLS), and `.mpd` (DASH) streams with page cookies, `User-Agent`, and `Referer`.
+- **Resolution Selector**: Choose **Original Quality**, **1080p Full HD**, **720p HD**, **480p SD**, or **360p Compact** before queuing the download.
+- **Background FFmpeg Processing**: Runs `FFmpegKit` / `FFprobeKit` in a `dataSync` foreground service with live progress notifications, cancellation support, and automatic `MediaStore` saving to `Movies/FlowBrowser`.
+- **Offline Library & In-App Player**: Browse, search, share, delete, and watch saved MP4 videos with Jetpack Media3 (`ExoPlayer`).
 
-## Publishing APKs via GitHub
+## Project Structure
 
-This project includes a ready-to-use GitHub Actions workflow at `.github/workflows/android-apk.yml`.
-
-### 1. Push to GitHub
-
-```bash
-git init
-git add .
-git commit -m "Initial LiveVault Android app"
-git branch -M main
-git remote add origin https://github.com/<your-username>/<your-repo>.git
-git push -u origin main
+```text
+FlowBrowser/
+├── .github/workflows/android-apk.yml   # GitHub Actions CI/CD APK builder
+├── app/
+│   ├── build.gradle.kts                # Module Gradle config & dependencies
+│   ├── proguard-rules.pro
+│   └── src/
+│       ├── main/
+│       │   ├── AndroidManifest.xml
+│       │   ├── java/com/example/
+│       │   │   ├── FlowBrowserApp.kt
+│       │   │   ├── MainActivity.kt
+│       │   │   ├── data/browser/       # Video models, URL classifier, JS sniffer
+│       │   │   ├── data/ffmpeg/        # FFmpeg command builder, OkHttp & FFmpeg processor
+│       │   │   ├── data/local/         # Room database, DAOs, repositories
+│       │   │   ├── data/recorder/      # MediaStore MP4 saver
+│       │   │   ├── service/            # Foreground DownloadService, coordinator, notifications
+│       │   │   └── ui/                 # Compose screens (Browser, Downloads, Player, Navigation, Theme)
+│       │   └── res/                    # Drawables, adaptive launcher icons, fonts, strings, xml
+│       └── test/                       # Unit & Robolectric tests
+├── gradle/libs.versions.toml           # Version catalog
+├── build.gradle.kts
+├── settings.gradle.kts
+└── README.md
 ```
 
-Every push or pull request to `main` runs unit tests and builds `LiveVault-debug.apk`, available for download under the **Actions -> LiveVault-APKs** artifact.
-
-### 2. Publish a GitHub Release APK
-
-Create and push a version tag (`v1.0.0`) to automatically publish a GitHub Release with the APK attached:
+## Building
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+gradle :app:testDebugUnitTest
+gradle :app:assembleDebug
 ```
-
-### 3. Optional: Signed Release APKs
-
-To also build and attach `LiveVault-release.apk`, add these Repository Secrets in **GitHub -> Settings -> Secrets and variables -> Actions**:
-
-- `KEYSTORE_BASE64`: Base64-encoded `.jks` upload keystore (with key alias `upload`)
-- `STORE_PASSWORD`: Keystore password
-- `KEY_PASSWORD`: Key password

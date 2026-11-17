@@ -39,9 +39,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.R
+import com.example.data.browser.UrlStreamClassifier
 import com.example.ui.components.Media3VideoPlayer
-import com.example.ui.theme.CyanSignal
-import com.example.ui.theme.MonoStatTextStyle
+import com.example.ui.theme.CyanElectric
+import com.example.ui.theme.MonoBadgeTextStyle
 import com.example.ui.util.Formatters
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,15 +65,14 @@ fun PlayerScreen(
                 title = {
                     Column {
                         Text(
-                            text = ready?.recording?.let { "@${it.username}" }
-                                ?: stringResource(R.string.player_title),
+                            text = ready?.video?.title ?: stringResource(R.string.player_title),
                             style = MaterialTheme.typography.titleLarge,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                         if (ready != null) {
                             Text(
-                                text = ready.recording.fileName,
+                                text = ready.video.fileName,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
@@ -100,11 +100,11 @@ fun PlayerScreen(
                             onClick = {
                                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
                                     type = "video/mp4"
-                                    putExtra(Intent.EXTRA_STREAM, Uri.parse(ready.recording.contentUri))
+                                    putExtra(Intent.EXTRA_STREAM, Uri.parse(ready.video.contentUri))
                                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                 }
                                 context.startActivity(
-                                    Intent.createChooser(shareIntent, "Share MP4 Recording")
+                                    Intent.createChooser(shareIntent, "Share MP4 Video")
                                 )
                             },
                             modifier = Modifier
@@ -134,18 +134,18 @@ fun PlayerScreen(
         ) {
             when (uiState) {
                 PlayerUiState.Loading -> {
-                    CircularProgressIndicator(color = CyanSignal)
+                    CircularProgressIndicator(color = CyanElectric)
                 }
                 PlayerUiState.Missing -> {
                     Text(
-                        text = "This MP4 recording is no longer available on the device.",
+                        text = "This MP4 video is no longer available on the device.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(24.dp)
                     )
                 }
                 is PlayerUiState.Ready -> {
-                    val rec = uiState.recording
+                    val video = uiState.video
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -160,9 +160,7 @@ fun PlayerScreen(
                                 .clip(MaterialTheme.shapes.large)
                         ) {
                             Media3VideoPlayer(
-                                mediaUri = rec.contentUri,
-                                isLiveStream = false,
-                                isMuted = false,
+                                mediaUri = video.contentUri,
                                 showControls = true,
                                 modifier = Modifier.fillMaxSize()
                             )
@@ -179,7 +177,7 @@ fun PlayerScreen(
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 Text(
-                                    text = rec.streamTitle,
+                                    text = video.title,
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onSurface,
                                     maxLines = 2,
@@ -188,24 +186,40 @@ fun PlayerScreen(
                                 Spacer(Modifier.height(2.dp))
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
                                     Text(
-                                        text = "Offline MP4",
-                                        style = MonoStatTextStyle,
-                                        color = CyanSignal
+                                        text = "${video.resolutionLabel} MP4",
+                                        style = MonoBadgeTextStyle,
+                                        color = CyanElectric
                                     )
+                                    if (video.width > 0 && video.height > 0) {
+                                        Text(
+                                            text = "• ${video.width}×${video.height}",
+                                            style = MonoBadgeTextStyle,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                     Text(
-                                        text = "• ${Formatters.formatDuration(rec.durationMs)}",
-                                        style = MonoStatTextStyle,
+                                        text = "• ${Formatters.formatBytes(video.fileSizeBytes)}",
+                                        style = MonoBadgeTextStyle,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
-                                    Text(
-                                        text = "• ${Formatters.formatBytes(rec.fileSizeBytes)}",
-                                        style = MonoStatTextStyle,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                    if (video.durationMs > 0L) {
+                                        Text(
+                                            text = "• ${Formatters.formatDuration(video.durationMs)}",
+                                            style = MonoBadgeTextStyle,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                 }
+                                Text(
+                                    text = "Source: ${UrlStreamClassifier.extractDomain(video.sourcePageUrl)}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
                         }
                     }

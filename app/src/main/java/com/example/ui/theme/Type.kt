@@ -28,26 +28,26 @@ val JetBrainsMonoFamily = FontFamily(
     Font(R.font.jetbrains_mono, FontWeight.Bold)
 )
 
-val LiveVaultTypography = Typography(
+val FlowBrowserTypography = Typography(
     displaySmall = TextStyle(
         fontFamily = SpaceGroteskFamily,
         fontWeight = FontWeight.Bold,
-        fontSize = 32.sp,
-        lineHeight = 38.sp,
+        fontSize = 30.sp,
+        lineHeight = 36.sp,
         letterSpacing = (-0.5).sp
     ),
     headlineMedium = TextStyle(
         fontFamily = SpaceGroteskFamily,
         fontWeight = FontWeight.Bold,
-        fontSize = 26.sp,
-        lineHeight = 32.sp,
+        fontSize = 24.sp,
+        lineHeight = 30.sp,
         letterSpacing = (-0.25).sp
     ),
     headlineSmall = TextStyle(
         fontFamily = SpaceGroteskFamily,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 22.sp,
-        lineHeight = 28.sp
+        fontSize = 20.sp,
+        lineHeight = 26.sp
     ),
     titleLarge = TextStyle(
         fontFamily = SpaceGroteskFamily,
@@ -58,8 +58,8 @@ val LiveVaultTypography = Typography(
     titleMedium = TextStyle(
         fontFamily = InterFamily,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 16.sp,
-        lineHeight = 22.sp,
+        fontSize = 15.sp,
+        lineHeight = 21.sp,
         letterSpacing = 0.1.sp
     ),
     bodyLarge = TextStyle(
@@ -93,30 +93,21 @@ val LiveVaultTypography = Typography(
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        letterSpacing = 0.4.sp
+        letterSpacing = 0.3.sp
     ),
     labelSmall = TextStyle(
         fontFamily = JetBrainsMonoFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 11.sp,
         lineHeight = 14.sp,
-        letterSpacing = 0.4.sp
+        letterSpacing = 0.3.sp
     )
 )
 
-val MonoTimerTextStyle = TextStyle(
+val MonoBadgeTextStyle = TextStyle(
     fontFamily = JetBrainsMonoFamily,
-    fontWeight = FontWeight.Bold,
-    fontSize = 26.sp,
-    lineHeight = 30.sp,
-    letterSpacing = 1.sp,
-    fontFeatureSettings = "tnum"
-)
-
-val MonoStatTextStyle = TextStyle(
-    fontFamily = JetBrainsMonoFamily,
-    fontWeight = FontWeight.Medium,
-    fontSize = 13.sp,
-    lineHeight = 18.sp,
+    fontWeight = FontWeight.SemiBold,
+    fontSize = 12.sp,
+    lineHeight = 16.sp,
     fontFeatureSettings = "tnum"
 )

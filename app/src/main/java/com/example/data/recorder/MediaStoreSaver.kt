@@ -33,7 +33,7 @@ object MediaStoreSaver {
             val values = ContentValues().apply {
                 put(MediaStore.Video.Media.DISPLAY_NAME, safeName)
                 put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
-                put(MediaStore.Video.Media.RELATIVE_PATH, "${Environment.DIRECTORY_MOVIES}/LiveVault")
+                put(MediaStore.Video.Media.RELATIVE_PATH, "${Environment.DIRECTORY_MOVIES}/FlowBrowser")
                 put(MediaStore.Video.Media.IS_PENDING, 1)
             }
             val collection = MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
@@ -65,9 +65,9 @@ object MediaStoreSaver {
             }
         } else {
             val moviesDir = context.getExternalFilesDir(Environment.DIRECTORY_MOVIES)
-                ?: File(context.filesDir, "recordings")
-            val vaultDir = File(moviesDir, "LiveVault").apply { mkdirs() }
-            val destFile = File(vaultDir, safeName)
+                ?: File(context.filesDir, "downloads")
+            val flowDir = File(moviesDir, "FlowBrowser").apply { mkdirs() }
+            val destFile = File(flowDir, safeName)
             tempMp4File.copyTo(destFile, overwrite = true)
             tempMp4File.delete()
             val providerUri = FileProvider.getUriForFile(

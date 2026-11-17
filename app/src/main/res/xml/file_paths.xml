@@ -4,8 +4,8 @@
         name="movies"
         path="Movies/" />
     <files-path
-        name="recordings"
-        path="recordings/" />
+        name="downloads"
+        path="downloads/" />
     <cache-path
         name="cache"
         path="." />

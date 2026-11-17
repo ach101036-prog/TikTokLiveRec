@@ -1,6 +1,6 @@
 {
-  "name": "LiveVault",
-  "description": "Check TikTok creator live status, watch live stream previews with a recording timer, and save streams locally as MP4 files for offline viewing.",
+  "name": "FlowBrowser",
+  "description": "Web browser that detects playing videos and saves them in MP4 format at your chosen resolution using FFmpeg in the background.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

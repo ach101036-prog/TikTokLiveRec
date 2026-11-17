@@ -8,27 +8,30 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.example.service.RecordingNotificationHelper
-import com.example.ui.navigation.LiveVaultAppNav
-import com.example.ui.theme.LiveVaultTheme
+import com.example.service.DownloadNotificationHelper
+import com.example.ui.navigation.FlowBrowserAppNav
+import com.example.ui.theme.FlowBrowserTheme
 
 class MainActivity : ComponentActivity() {
 
-    private var pendingRecordingId by mutableStateOf<Long?>(null)
+    private var openDownloadsTab by mutableStateOf(false)
+    private var pendingVideoIdToOpen by mutableStateOf<Long?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        extractRecordingId(intent)
+        handleNavigationIntent(intent)
 
-        val appContainer = (application as LiveVaultApp).container
+        val appContainer = (application as FlowBrowserApp).container
 
         setContent {
-            LiveVaultTheme {
-                LiveVaultAppNav(
+            FlowBrowserTheme {
+                FlowBrowserAppNav(
                     container = appContainer,
-                    initialRecordingIdToOpen = pendingRecordingId,
-                    onConsumedInitialRecordingId = { pendingRecordingId = null }
+                    openDownloadsRequested = openDownloadsTab,
+                    onConsumedOpenDownloads = { openDownloadsTab = false },
+                    initialVideoIdToOpen = pendingVideoIdToOpen,
+                    onConsumedInitialVideoId = { pendingVideoIdToOpen = null }
                 )
             }
         }
@@ -36,13 +39,18 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        extractRecordingId(intent)
+        handleNavigationIntent(intent)
     }
 
-    private fun extractRecordingId(intent: Intent?) {
-        val id = intent?.getLongExtra(RecordingNotificationHelper.EXTRA_OPEN_RECORDING_ID, -1L) ?: -1L
-        if (id > 0L) {
-            pendingRecordingId = id
+    private fun handleNavigationIntent(intent: Intent?) {
+        if (intent == null) return
+        val openDownloads = intent.getBooleanExtra(DownloadNotificationHelper.EXTRA_OPEN_DOWNLOADS, false)
+        if (openDownloads) {
+            openDownloadsTab = true
+        }
+        val videoId = intent.getLongExtra(DownloadNotificationHelper.EXTRA_OPEN_VIDEO_ID, -1L)
+        if (videoId > 0L) {
+            pendingVideoIdToOpen = videoId
         }
     }
 }

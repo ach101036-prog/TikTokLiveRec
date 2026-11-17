@@ -55,7 +55,7 @@ jobs:
       - name: Prepare APK artifact
         run: |
           mkdir -p dist
-          cp app/build/outputs/apk/debug/app-debug.apk dist/LiveVault-debug.apk
+          cp app/build/outputs/apk/debug/app-debug.apk dist/FlowBrowser-debug.apk
 
       - name: Build Signed Release APK (if signing secrets configured)
         if: ${{ secrets.KEYSTORE_BASE64 != '' && secrets.STORE_PASSWORD != '' && secrets.KEY_PASSWORD != '' }}
@@ -66,12 +66,12 @@ jobs:
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > my-upload-key.jks
           gradle :app:assembleRelease --no-daemon
-          cp app/build/outputs/apk/release/app-release.apk dist/LiveVault-release.apk
+          cp app/build/outputs/apk/release/app-release.apk dist/FlowBrowser-release.apk
 
       - name: Upload APK Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: LiveVault-APKs
+          name: FlowBrowser-APKs
           path: dist/*.apk
 
       - name: Publish GitHub Release on Tag

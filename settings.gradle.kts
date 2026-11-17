@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "LiveVault"
+rootProject.name = "FlowBrowser"
 
 include(":app")

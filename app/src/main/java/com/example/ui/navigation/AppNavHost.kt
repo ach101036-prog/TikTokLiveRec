@@ -7,10 +7,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.VideoLibrary
-import androidx.compose.material.icons.outlined.Videocam
-import androidx.compose.material.icons.rounded.VideoLibrary
-import androidx.compose.material.icons.rounded.Videocam
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -20,10 +22,15 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -40,111 +47,146 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.AppContainer
 import com.example.R
+import com.example.ui.browser.BrowserScreen
+import com.example.ui.browser.BrowserViewModel
+import com.example.ui.downloads.DownloadsScreen
+import com.example.ui.downloads.DownloadsViewModel
 import com.example.ui.player.PlayerScreen
 import com.example.ui.player.PlayerViewModel
-import com.example.ui.studio.StudioScreen
-import com.example.ui.studio.StudioViewModel
-import com.example.ui.theme.CrimsonLive
-import com.example.ui.theme.CyanSignal
-import com.example.ui.theme.CyanSignalContainer
-import com.example.ui.vault.VaultScreen
-import com.example.ui.vault.VaultViewModel
+import com.example.ui.theme.CyanElectric
+import com.example.ui.theme.CyanElectricContainer
 import kotlinx.serialization.Serializable
 
 @Serializable
-object StudioRoute
+object BrowserRoute
 
 @Serializable
-object VaultRoute
+object DownloadsRoute
 
 @Serializable
-data class PlayerRoute(val recordingId: Long)
+data class PlayerRoute(val videoId: Long)
 
 @Composable
-fun LiveVaultAppNav(
+fun FlowBrowserAppNav(
     container: AppContainer,
-    initialRecordingIdToOpen: Long?,
-    onConsumedInitialRecordingId: () -> Unit
+    openDownloadsRequested: Boolean,
+    onConsumedOpenDownloads: () -> Unit,
+    initialVideoIdToOpen: Long?,
+    onConsumedInitialVideoId: () -> Unit
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Keep browser tabs & saved WebView state alive across tab switches
+    val browserVm: BrowserViewModel = viewModel(
+        factory = BrowserViewModel.Factory(
+            bookmarkRepository = container.bookmarkRepository,
+            downloadCoordinator = container.downloadCoordinator
+        )
+    )
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
     val isTopLevel = currentDestination?.hasRoute<PlayerRoute>() != true
 
-    LaunchedEffect(initialRecordingIdToOpen) {
-        if (initialRecordingIdToOpen != null && initialRecordingIdToOpen > 0L) {
-            navController.navigate(PlayerRoute(initialRecordingIdToOpen))
-            onConsumedInitialRecordingId()
+    val jobs by container.downloadCoordinator.jobs.collectAsStateWithLifecycle()
+    val activeJobCount = jobs.count { it.isActive }
+    val bannerEvent by container.downloadCoordinator.bannerEvent.collectAsStateWithLifecycle()
+
+    LaunchedEffect(openDownloadsRequested, initialVideoIdToOpen) {
+        if (initialVideoIdToOpen != null && initialVideoIdToOpen > 0L) {
+            navController.navigate(PlayerRoute(initialVideoIdToOpen))
+            onConsumedInitialVideoId()
+            onConsumedOpenDownloads()
+        } else if (openDownloadsRequested) {
+            navController.navigate(DownloadsRoute) {
+                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+            onConsumedOpenDownloads()
         }
     }
 
-    val recordingState by container.recordingCoordinator.state.collectAsStateWithLifecycle()
+    LaunchedEffect(bannerEvent) {
+        val evt = bannerEvent ?: return@LaunchedEffect
+        val actionLabel = if (!evt.isError && evt.savedVideoId != null) "Play" else null
+        val result = snackbarHostState.showSnackbar(
+            message = evt.message,
+            actionLabel = actionLabel,
+            duration = SnackbarDuration.Short
+        )
+        if (result == SnackbarResult.ActionPerformed && evt.savedVideoId != null) {
+            navController.navigate(PlayerRoute(evt.savedVideoId))
+        }
+        container.downloadCoordinator.dismissBanner()
+    }
+
+    fun navigateToTopLevel(route: Any) {
+        navController.navigate(route) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val useRail = maxWidth >= 600.dp
 
         Scaffold(
             contentWindowInsets = WindowInsets.safeDrawing,
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             bottomBar = {
                 if (isTopLevel && !useRail) {
-                    NavigationBar(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ) {
-                        val studioSelected = currentDestination?.hasRoute<StudioRoute>() == true
-                        val vaultSelected = currentDestination?.hasRoute<VaultRoute>() == true
+                    NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
+                        val browserSelected = currentDestination?.hasRoute<BrowserRoute>() == true
+                        val downloadsSelected = currentDestination?.hasRoute<DownloadsRoute>() == true
 
                         NavigationBarItem(
-                            selected = studioSelected,
-                            onClick = {
-                                navController.navigate(StudioRoute) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
+                            selected = browserSelected,
+                            onClick = { navigateToTopLevel(BrowserRoute) },
                             icon = {
                                 Icon(
-                                    imageVector = if (studioSelected) Icons.Rounded.Videocam else Icons.Outlined.Videocam,
-                                    contentDescription = stringResource(R.string.nav_studio),
-                                    tint = if (recordingState.isBusy) CrimsonLive else if (studioSelected) CyanSignal else MaterialTheme.colorScheme.onSurfaceVariant
+                                    imageVector = if (browserSelected) Icons.Rounded.Language else Icons.Outlined.Language,
+                                    contentDescription = stringResource(R.string.nav_browser)
                                 )
                             },
-                            label = { Text(stringResource(R.string.nav_studio)) },
+                            label = { Text(stringResource(R.string.nav_browser)) },
                             colors = NavigationBarItemDefaults.colors(
-                                indicatorColor = CyanSignalContainer,
-                                selectedTextColor = CyanSignal
+                                indicatorColor = CyanElectricContainer,
+                                selectedIconColor = CyanElectric,
+                                selectedTextColor = CyanElectric
                             ),
-                            modifier = Modifier.testTag("nav_studio")
+                            modifier = Modifier.testTag("nav_browser")
                         )
 
                         NavigationBarItem(
-                            selected = vaultSelected,
-                            onClick = {
-                                navController.navigate(VaultRoute) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                            selected = downloadsSelected,
+                            onClick = { navigateToTopLevel(DownloadsRoute) },
+                            icon = {
+                                BadgedBox(
+                                    badge = {
+                                        if (activeJobCount > 0) {
+                                            Badge { Text(activeJobCount.toString()) }
+                                        }
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
+                                ) {
+                                    Icon(
+                                        imageVector = if (downloadsSelected) Icons.Rounded.Download else Icons.Outlined.Download,
+                                        contentDescription = stringResource(R.string.nav_downloads)
+                                    )
                                 }
                             },
-                            icon = {
-                                Icon(
-                                    imageVector = if (vaultSelected) Icons.Rounded.VideoLibrary else Icons.Outlined.VideoLibrary,
-                                    contentDescription = stringResource(R.string.nav_vault)
-                                )
-                            },
-                            label = { Text(stringResource(R.string.nav_vault)) },
+                            label = { Text(stringResource(R.string.nav_downloads)) },
                             colors = NavigationBarItemDefaults.colors(
-                                indicatorColor = CyanSignalContainer,
-                                selectedIconColor = CyanSignal,
-                                selectedTextColor = CyanSignal
+                                indicatorColor = CyanElectricContainer,
+                                selectedIconColor = CyanElectric,
+                                selectedTextColor = CyanElectric
                             ),
-                            modifier = Modifier.testTag("nav_vault")
+                            modifier = Modifier.testTag("nav_downloads")
                         )
                     }
                 }
@@ -156,111 +198,87 @@ fun LiveVaultAppNav(
                     .padding(innerPadding)
             ) {
                 if (isTopLevel && useRail) {
-                    NavigationRail(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ) {
-                        val studioSelected = currentDestination?.hasRoute<StudioRoute>() == true
-                        val vaultSelected = currentDestination?.hasRoute<VaultRoute>() == true
+                    NavigationRail(containerColor = MaterialTheme.colorScheme.surface) {
+                        val browserSelected = currentDestination?.hasRoute<BrowserRoute>() == true
+                        val downloadsSelected = currentDestination?.hasRoute<DownloadsRoute>() == true
 
                         NavigationRailItem(
-                            selected = studioSelected,
-                            onClick = {
-                                navController.navigate(StudioRoute) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
+                            selected = browserSelected,
+                            onClick = { navigateToTopLevel(BrowserRoute) },
                             icon = {
                                 Icon(
-                                    imageVector = if (studioSelected) Icons.Rounded.Videocam else Icons.Outlined.Videocam,
-                                    contentDescription = stringResource(R.string.nav_studio)
+                                    imageVector = if (browserSelected) Icons.Rounded.Language else Icons.Outlined.Language,
+                                    contentDescription = stringResource(R.string.nav_browser)
                                 )
                             },
-                            label = { Text(stringResource(R.string.nav_studio)) },
+                            label = { Text(stringResource(R.string.nav_browser)) },
                             colors = NavigationRailItemDefaults.colors(
-                                indicatorColor = CyanSignalContainer,
-                                selectedIconColor = CyanSignal,
-                                selectedTextColor = CyanSignal
+                                indicatorColor = CyanElectricContainer,
+                                selectedIconColor = CyanElectric,
+                                selectedTextColor = CyanElectric
                             ),
-                            modifier = Modifier.testTag("rail_studio")
+                            modifier = Modifier.testTag("rail_browser")
                         )
 
                         NavigationRailItem(
-                            selected = vaultSelected,
-                            onClick = {
-                                navController.navigate(VaultRoute) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                            selected = downloadsSelected,
+                            onClick = { navigateToTopLevel(DownloadsRoute) },
+                            icon = {
+                                BadgedBox(
+                                    badge = {
+                                        if (activeJobCount > 0) {
+                                            Badge { Text(activeJobCount.toString()) }
+                                        }
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
+                                ) {
+                                    Icon(
+                                        imageVector = if (downloadsSelected) Icons.Rounded.Download else Icons.Outlined.Download,
+                                        contentDescription = stringResource(R.string.nav_downloads)
+                                    )
                                 }
                             },
-                            icon = {
-                                Icon(
-                                    imageVector = if (vaultSelected) Icons.Rounded.VideoLibrary else Icons.Outlined.VideoLibrary,
-                                    contentDescription = stringResource(R.string.nav_vault)
-                                )
-                            },
-                            label = { Text(stringResource(R.string.nav_vault)) },
+                            label = { Text(stringResource(R.string.nav_downloads)) },
                             colors = NavigationRailItemDefaults.colors(
-                                indicatorColor = CyanSignalContainer,
-                                selectedIconColor = CyanSignal,
-                                selectedTextColor = CyanSignal
+                                indicatorColor = CyanElectricContainer,
+                                selectedIconColor = CyanElectric,
+                                selectedTextColor = CyanElectric
                             ),
-                            modifier = Modifier.testTag("rail_vault")
+                            modifier = Modifier.testTag("rail_downloads")
                         )
                     }
                 }
 
                 NavHost(
                     navController = navController,
-                    startDestination = StudioRoute,
+                    startDestination = BrowserRoute,
                     modifier = Modifier.weight(1f)
                 ) {
-                    composable<StudioRoute> {
-                        val studioVm: StudioViewModel = viewModel(
-                            factory = StudioViewModel.Factory(
-                                liveChecker = container.liveChecker,
-                                preferencesRepository = container.preferencesRepository,
-                                recordingCoordinator = container.recordingCoordinator
-                            )
-                        )
-                        val state by studioVm.uiState.collectAsStateWithLifecycle()
-                        StudioScreen(
-                            uiState = state,
-                            onUsernameChange = studioVm::onUsernameChange,
-                            onCheckLiveStatus = { studioVm.checkLiveStatus() },
-                            onSelectRecentUsername = studioVm::selectRecentUsername,
-                            onSelectQuality = studioVm::setPreferredQuality,
-                            onStartRecording = { creator -> studioVm.startRecording(context, creator) },
-                            onStopRecording = { studioVm.stopRecording(context) },
-                            onTogglePreviewMute = studioVm::togglePreviewMute,
-                            onDismissBanner = studioVm::dismissBanner,
-                            onOpenSavedRecording = { recordingId ->
-                                studioVm.dismissBanner()
-                                navController.navigate(PlayerRoute(recordingId))
-                            }
+                    composable<BrowserRoute> {
+                        val browserState by browserVm.uiState.collectAsStateWithLifecycle()
+                        BrowserScreen(
+                            uiState = browserState,
+                            viewModel = browserVm,
+                            onNavigateToDownloads = { navigateToTopLevel(DownloadsRoute) }
                         )
                     }
 
-                    composable<VaultRoute> {
-                        val vaultVm: VaultViewModel = viewModel(
-                            factory = VaultViewModel.Factory(
-                                recordingRepository = container.recordingRepository
+                    composable<DownloadsRoute> {
+                        val downloadsVm: DownloadsViewModel = viewModel(
+                            factory = DownloadsViewModel.Factory(
+                                downloadRepository = container.downloadRepository,
+                                downloadCoordinator = container.downloadCoordinator
                             )
                         )
-                        val state by vaultVm.uiState.collectAsStateWithLifecycle()
-                        VaultScreen(
+                        val state by downloadsVm.uiState.collectAsStateWithLifecycle()
+                        DownloadsScreen(
                             uiState = state,
-                            onSearchQueryChange = vaultVm::onSearchQueryChange,
-                            onPlayRecording = { recording ->
-                                navController.navigate(PlayerRoute(recording.id))
+                            onSearchQueryChange = downloadsVm::onSearchQueryChange,
+                            onCancelJob = { jobId -> downloadsVm.cancelJob(context, jobId) },
+                            onDismissJob = downloadsVm::dismissInactiveJob,
+                            onPlayVideo = { video ->
+                                navController.navigate(PlayerRoute(video.id))
                             },
-                            onDeleteRecording = vaultVm::deleteRecording
+                            onDeleteVideo = downloadsVm::deleteVideo
                         )
                     }
 
@@ -268,8 +286,8 @@ fun LiveVaultAppNav(
                         val route = entry.toRoute<PlayerRoute>()
                         val playerVm: PlayerViewModel = viewModel(
                             factory = PlayerViewModel.Factory(
-                                recordingId = route.recordingId,
-                                recordingRepository = container.recordingRepository
+                                videoId = route.videoId,
+                                downloadRepository = container.downloadRepository
                             )
                         )
                         val state by playerVm.uiState.collectAsStateWithLifecycle()
